@@ -291,6 +291,15 @@ Friend Module ModSecret
                 .Details = "未执行位置或网络地理查询。"
             }
         End If
+        ' 单设备授权只解除 Minecraft 下载限制；不会跳过 Microsoft 登录授权。
+        If PclRcLicenseValid(ForceRefresh) Then
+            Return New RegionStatus With {
+                .CountryCode = "已授权",
+                .DownloadAllowed = True,
+                .Reason = "PCL RC 单设备授权已验证，Minecraft 下载限制已解除。",
+                .Details = "授权状态已由 PCL RC 服务端确认。"
+            }
+        End If
         SyncLock RegionDecisionLock
             If Not ForceRefresh AndAlso RegionStatusCache.HasValue AndAlso Date.UtcNow < RegionCheckExpires Then
                 Return RegionStatusCache.Value
