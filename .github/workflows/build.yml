@@ -167,6 +167,9 @@ jobs:
           - **地區顯示：** 首次進入提示地區與下載可用性，之後在左上角常駐顯示，點擊可重新檢查。
           - **設定介面：** 登錄檔隔離改為狀態文字與「更改」按鈕，切換後重啟生效。
           - **Microsoft 正版登入：** 本版已預設 Microsoft Client ID，但尚未完成 Minecraft Services 實際權限驗證，不能保證登入成功。
+          - **單裝置下載授權：** 在「設定 → 其他 → PCL RC 下載授權」輸入審核通過的 KEY，使用 Windows CNG 裝置金鑰與 Cloudflare 授權伺服器驗證後，可解除 PCL RC 內的 Minecraft 下載與地區限制；未授權使用者仍可正常使用啟動器。
+          - **官網下載檔名：** GitHub 將含空白的上傳檔名正規化為 PCL.RC.exe，官網會以 PCL RC.exe 提供下載。
+          - **驗證限制：** 已通過 Windows Release／Debug 編譯；尚未完成授權 KEY 與 Windows GUI 的端到端實機驗證。
 
           注意：Windows 高精度定位可能使用 GPS、Wi-Fi 或其他來源，並非保證衛星 GPS。離線國界資料有解析度限制，靠近邊境或海岸可能需要備援確認。網路代理及 VPN 可能影響判斷，無法保證用戶端防竄改或各國法規合規。這是預發布測試版，尚未完成 Windows 實際操作測試。
 
