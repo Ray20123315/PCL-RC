@@ -154,6 +154,8 @@ jobs:
           fi
           cat > prerelease-notes.md <<'NOTES'
           **Plain Craft Launcher – Ray Custom（PCL RC）** 公開測試版，基於 PCL2 的非官方修改版本。本版預先設定 Microsoft Client ID，並啟用地區下載檢查。
+          官網：https://pcl-rc-licenses.ray20123315.workers.dev/
+          公開 GitHub 專案：https://github.com/Ray20123315/PCL-RC/
 
           - **社群資源：** 使用 Modrinth；CurseForge API 連線暫停，原始碼保留。
           - **品牌與介面：** Windows EXE 使用專屬 PCL-RC 圖示；啟動過渡動畫不再使用小尺寸 ICO，改為獨立的 160 × 160 PNG；左上角維持原有 PCL-RC 圖示。GitHub 直下載為英文檔名，ZIP 內提供中文檔名 EXE。
