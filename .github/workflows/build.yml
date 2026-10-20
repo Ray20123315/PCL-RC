@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_prerelease:
-        description: 'Publish a PCL-RC public region-checked prerelease after successful builds'
+        description: 'Publish a PCL-RC public no-MS-ID source prerelease after successful builds'
         required: false
         type: boolean
         default: false
@@ -66,19 +66,6 @@ jobs:
       run: |
         (gc "Plain Craft Launcher 2\Modules\Base\ModBase.vb") -replace 'Public Const CommitHash As String = ""', 'Public Const CommitHash As String = "${{ github.sha }}"' | Out-File "Plain Craft Launcher 2\Modules\Base\ModBase.vb"
         
-    - name: Configure public MS-Region build
-      shell: pwsh
-      run: |
-        $path = 'Plain Craft Launcher 2/Modules/ModSecret.vb'
-        $source = [System.IO.File]::ReadAllText($path)
-        $expected = 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "")'
-        $configured = 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "993878ee-3bd4-48a7-a738-df4d8b2fbf19")'
-        if (-not $source.Contains($expected) -or -not $source.Contains('Public Const EnableRegionCheck As Boolean = True')) {
-          throw 'Expected Microsoft Client ID / enabled region check policy was not found'
-        }
-        $source = $source.Replace($expected, $configured)
-        [System.IO.File]::WriteAllText($path, $source, (New-Object System.Text.UTF8Encoding($false)))
-
     - name: Generate PCL-RC application icon
       shell: pwsh
       run: |
@@ -142,33 +129,32 @@ jobs:
           set -euo pipefail
           original="prerelease-dist/Plain Craft Launcher 2.exe"
           test -s "$original"
-          asset="prerelease-dist/PCL RC.exe"
+          asset="prerelease-dist/PCL-RC-OpenSource-NoMS.exe"
           mv "$original" "$asset"
-          (cd prerelease-dist && zip -q PCL-RC-MS-Region.zip "PCL RC.exe")
-          package="prerelease-dist/PCL-RC-MS-Region.zip"
+          (cd prerelease-dist && zip -q PCL-RC-OpenSource-NoMS.zip "PCL-RC-OpenSource-NoMS.exe")
+          package="prerelease-dist/PCL-RC-OpenSource-NoMS.zip"
           test -s "$package"
-          tag="pcl-rc-public-${GITHUB_SHA:0:8}"
+          tag="pcl-rc-opensource-${GITHUB_SHA:0:8}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Pre-release $tag already exists; keeping the existing verified release."
             exit 0
           fi
           cat > prerelease-notes.md <<'NOTES'
-          **Plain Craft Launcher – Ray Custom（PCL RC）** 公開測試版，基於 PCL2 的非官方修改版本。本版預先設定 Microsoft Client ID，並啟用地區下載檢查。
+          **Plain Craft Launcher – Ray Custom（PCL RC）** 公開測試版，基於 PCL2 的非官方修改版本。本版不內建 Microsoft Client ID，並啟用地區下載檢查。
           官網：https://pcl-rc-licenses.ray20123315.workers.dev/
           公開 GitHub 專案：https://github.com/Ray20123315/PCL-RC/
 
           - **社群資源：** 使用 Modrinth；CurseForge API 連線暫停，原始碼保留。
-          - **品牌與介面：** Windows EXE 使用專屬 PCL-RC 圖示；啟動過渡動畫不再使用小尺寸 ICO，改為獨立的 160 × 160 PNG；左上角維持原有 PCL-RC 圖示。GitHub 直下載為英文檔名，ZIP 內提供中文檔名 EXE。
+          - **品牌與介面：** Windows EXE 使用專屬 PCL-RC 圖示；啟動過渡動畫不再使用小尺寸 ICO，改為獨立的 160 × 160 PNG；左上角維持原有 PCL-RC 圖示。GitHub 及 ZIP 中的執行檔均命名為 PCL-RC-OpenSource-NoMS.exe。
           - **首次使用說明：** 用一次性的「PCL-RC 使用须知」替換原版協議提示及舊「開源版本說明」，完整說明見 NOTICE.md；原 LICENCE 與著作權聲明保留。
-          - **私人無地區檢查版：** 不會詢問裝置定位權限、不會呼叫裝置定位或 IP 地理查詢；其他 Minecraft 網路服務不受影響。
           - **地區檢查 v3：** 優先使用獲得授權的 Windows 高精度裝置位置，並以內建離線地圖在本機判斷國家；無法確認時參考 Windows 地區設定與網路出口 IP。Windows 地區設定可自行變更，不會單獨使下載功能解鎖。中國大陸（CN）及未能可靠確認時依規則暫停下載。
           - **地圖資料：** 使用 Natural Earth 公有領域國界資料作為裝置位置的本機國家判定。此資料屬概略地圖，沿海或邊界可能回退其他檢查。
           - **隱私與介面：** 初次使用裝置位置須徵求明確許可；不會將裝置經緯度上傳至外部服務。一般介面只顯示地區與下載狀態，不列出內部地區查詢來源或代理細節。
           - **地區顯示：** 首次進入提示地區與下載可用性，之後在左上角常駐顯示，點擊可重新檢查。
           - **設定介面：** 登錄檔隔離改為狀態文字與「更改」按鈕，切換後重啟生效。
-          - **Microsoft 正版登入：** 本版已預設 Microsoft Client ID，但尚未完成 Minecraft Services 實際權限驗證，不能保證登入成功。
+          - **Microsoft 正版登入：** 開源建置不內建 Microsoft Client ID，使用者須自行合法設定應用程式 Client ID。能否使用 Minecraft Services 仍需驗證。
           - **單裝置下載授權：** 在「設定 → 其他 → PCL RC 下載授權」輸入審核通過的 KEY，使用 Windows CNG 裝置金鑰與 Cloudflare 授權伺服器驗證後，可解除 PCL RC 內的 Minecraft 下載與地區限制；未授權使用者仍可正常使用啟動器。
-          - **官網下載檔名：** GitHub 將含空白的上傳檔名正規化為 PCL.RC.exe，官網會以 PCL RC.exe 提供下載。
+          - **官網下載：** 官網 PCL RC.exe 為獨立固定的 MS-Region Client-ID 預設建置，與本開源發行檔分開，不會從「最新開源發行版」自動取代。
           - **驗證限制：** 已通過 Windows Release／Debug 編譯；尚未完成授權 KEY 與 Windows GUI 的端到端實機驗證。
 
           注意：Windows 高精度定位可能使用 GPS、Wi-Fi 或其他來源，並非保證衛星 GPS。離線國界資料有解析度限制，靠近邊境或海岸可能需要備援確認。網路代理及 VPN 可能影響判斷，無法保證用戶端防竄改或各國法規合規。這是預發布測試版，尚未完成 Windows 實際操作測試。
@@ -179,7 +165,7 @@ jobs:
           gh release create "$tag" "$asset" "$package" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "Plain Craft Launcher – Ray Custom（PCL RC）MS-Region 公開測試版" \
+            --title "Plain Craft Launcher – Ray Custom（PCL RC）開源無預設 Microsoft Client ID 版" \
             --prerelease \
             --latest=false \
             --notes-file prerelease-notes.md
