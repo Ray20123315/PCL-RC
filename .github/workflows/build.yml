@@ -82,9 +82,9 @@ jobs:
             output, format='ICO', sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
         with Image.open(output) as check:
             check.verify()
-        # WPF SplashScreen treats an ICO as a tiny icon; render a dedicated 320px PNG.
+        # WPF SplashScreen treats an ICO as a tiny icon; render a compact dedicated 160px PNG.
         splash = Path('Plain Craft Launcher 2/Images/Splash.png')
-        image.convert('RGBA').resize((320, 320), Image.Resampling.LANCZOS).save(
+        image.convert('RGBA').resize((160, 160), Image.Resampling.LANCZOS).save(
             splash, format='PNG', optimize=True)
         with Image.open(splash) as check:
             check.verify()
@@ -145,7 +145,7 @@ jobs:
           **Plain Craft Launcher – Ray Custom（PCL-RC）** 是以 PCL2 為基礎的非官方修改版；此版本啟用地區檢查且不內建 Microsoft Client ID。
 
           - **社群資源：** 使用 Modrinth；CurseForge API 連線暫停，原始碼保留。
-          - **品牌與介面：** Windows EXE 使用專屬 PCL-RC 圖示；啟動過渡動畫不再使用小尺寸 ICO，改為獨立的 320 × 320 PNG；左上角維持原有 PCL-RC 圖示。GitHub 直下載為英文檔名，ZIP 內提供中文檔名 EXE。
+          - **品牌與介面：** Windows EXE 使用專屬 PCL-RC 圖示；啟動過渡動畫不再使用小尺寸 ICO，改為獨立的 160 × 160 PNG；左上角維持原有 PCL-RC 圖示。GitHub 直下載為英文檔名，ZIP 內提供中文檔名 EXE。
           - **首次使用說明：** 用一次性的「PCL-RC 使用须知」替換原版協議提示及舊「開源版本說明」，完整說明見 NOTICE.md；原 LICENCE 與著作權聲明保留。
           - **私人無地區檢查版：** 不會詢問裝置定位權限、不會呼叫裝置定位或 IP 地理查詢；其他 Minecraft 網路服務不受影響。
           - **地區檢查 v3：** 優先使用獲得授權的 Windows 高精度裝置位置，並以內建離線地圖在本機判斷國家；無法確認時參考 Windows 地區設定與網路出口 IP。Windows 地區設定可自行變更，不會單獨使下載功能解鎖。中國大陸（CN）及未能可靠確認時依規則暫停下載。
