@@ -82,7 +82,14 @@ jobs:
             output, format='ICO', sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
         with Image.open(output) as check:
             check.verify()
+        # WPF SplashScreen treats an ICO as a tiny icon; render a dedicated 320px PNG.
+        splash = Path('Plain Craft Launcher 2/Images/Splash.png')
+        image.convert('RGBA').resize((320, 320), Image.Resampling.LANCZOS).save(
+            splash, format='PNG', optimize=True)
+        with Image.open(splash) as check:
+            check.verify()
         print('Embedded PCL-RC icon:', output, output.stat().st_size)
+        print('WPF startup SplashScreen PNG:', splash, splash.stat().st_size)
         '@ | python -
 
     - name: Restore NuGet Packages
