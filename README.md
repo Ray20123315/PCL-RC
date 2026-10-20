@@ -16,6 +16,8 @@ PCL RC 是基於 Plain Craft Launcher 2（PCL2）的**非官方個人修改版**
 
 目前為測試發行：Windows CI 建置可驗證，仍須另外完成 Windows 實機的授權、登入、下載與地區行為測試。官網版 Microsoft Client ID 已預設，但尚未確定 Minecraft Services 接受該應用程式；開源原始碼和開源發行版不內建此 ID。
 
+- **下載分流：** GitHub 開源 Release 以 `pcl-rc-opensource-` 標籤發布不內建 Microsoft Client ID 的 Windows 程式；官網則提供獨立、預先設定 Microsoft Client ID 的 MS-Region 測試版，兩者皆維持下載地區檢查。
+
 ## 專案與授權
 
 - 原始專案：[Meloong-Git/PCL](https://github.com/Meloong-Git/PCL)
