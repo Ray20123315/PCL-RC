@@ -414,14 +414,17 @@ Public Class FormMain
         RunInNewThread(
         Sub()
             'EULA 提示
-            Const EulaVersion As Integer = 2
+            Const EulaVersion As Integer = 3
             If Settings.Get(Of Integer)("SystemEulaVersion") < EulaVersion Then
                 Select Case MyMsgBox(
-                    If(Settings.Get(Of Integer)("SystemEulaVersion") = 0,
-                        "在使用 PCL 前，请先阅读用户协议与免责声明。",
-                        $"PCL 的用户协议与免责声明已更新。{vbCrLf}请阅读更新后的用户协议与免责声明。"),
-                        "协议授权", "同意", "拒绝", "查看用户协议与免责声明",
-                        Button3Action:=Sub() OpenWebsite("https://shimo.im/docs/rGrd8pY8xWkt6ryW"))
+                    "欢迎使用 Plain Craft Launcher – Ray Custom（PCL-RC）！" & vbCrLf &
+                    "这是基于 PCL2 的非官方修改版，不代表原作者、Microsoft 或 Mojang 官方。" & vbCrLf &
+                    "请遵守原项目及第三方组件的授权条款，并自行确保使用 Minecraft 服务的账号及许可有效。" & vbCrLf &
+                    "启用地区检查的版本会在获得许可后尝试设备定位，并可能查询网络出口地区；" &
+                    "未启用地区检查的版本不会读取设备位置或查询地区。" & vbCrLf &
+                    "完整说明与原项目许可可在项目仓库中查看。",
+                    "PCL-RC 使用须知", "已了解并继续", "退出", "查看完整说明与许可",
+                    Button3Action:=Sub() OpenWebsite("https://github.com/Ray20123315/PCL-RC/blob/main/NOTICE.md"))
                     Case 1
                         Settings.Set("SystemEulaVersion", EulaVersion)
                     Case 2
@@ -447,12 +450,7 @@ Public Class FormMain
             End Try
             '上报
             Telemetry("启动")
-            '开源版本提示：依据实际构建是否提供 Client ID 更新提示，其他说明不变。
-            If VersionBranchMain = "OpenSource" Then
-                MyMsgBox($"该版本中无法使用以下特性：{vbCrLf}- CurseForge API 调用：此修改版已暂停该功能，请使用 Modrinth{vbCrLf}" &
-                    If(String.IsNullOrWhiteSpace(OAuthClientId), "- 正版登录：此构建未内置 Microsoft Client ID，无法直接使用正版登录。" & vbCrLf, "") &
-                    $"- 更新与联网通知：避免滥用隐患{vbCrLf}- 主题切换：这是需要赞助解锁的纪念性质的功能，别让赞助者太伤心啦……{vbCrLf}- 百宝箱：开发早期往里面塞了些开发工具，整理起来太麻烦了……", "开源版本说明")
-            End If
+            'PCL-RC 使用须知已经在首次启动时展示，不再弹出旧版开源限制说明。
             RunInUi(Sub() StartRegionStatusCheck())
         End Sub, "初始化", ThreadPriority.Lowest)
 
@@ -461,6 +459,13 @@ Public Class FormMain
     '首次进入时提示地区与下载状态；不在一般界面显示位置服务、代理检查等内部实现。
     Private _regionCheckRunning As Boolean = False
     Private Sub StartRegionStatusCheck(Optional ForceRefresh As Boolean = False)
+        '无地区检查版本不请求定位权限，也不进行 IP 或设备地理位置查询。
+        If Not EnableRegionCheck Then
+            LabTitleRegion.Text = "PCL-RC · 下载：可用"
+            LabTitleRegion.ToolTip = "此版本未启用地区检查。"
+            LabTitleRegion.Cursor = System.Windows.Input.Cursors.Arrow
+            Return
+        End If
         If _regionCheckRunning Then Return
         '首次访问设备位置前征求明确同意。拒绝后仍可继续，不上传精确坐标。
         Dim PermissionPath = "HKEY_CURRENT_USER\Software\PCLRegionUi"

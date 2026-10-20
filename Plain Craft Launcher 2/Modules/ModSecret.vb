@@ -282,6 +282,15 @@ Friend Module ModSecret
     '至少两个定位源一致才视为已核实；第三个来源仅在前两个失败或冲突时启用。
     '任一有效来源明确返回 CN 时保守拒绝，以免出现互相冲突却放行的情况。
     Public Function GetRegionStatus(Optional ForceRefresh As Boolean = False) As RegionStatus
+        '跳过全部设备定位、Windows 地区及公网 IP 查询，无地区检查版始终可下载。
+        If Not EnableRegionCheck Then
+            Return New RegionStatus With {
+                .CountryCode = "未检查",
+                .DownloadAllowed = True,
+                .Reason = "此版本未启用地区检查。",
+                .Details = "未执行位置或网络地理查询。"
+            }
+        End If
         SyncLock RegionDecisionLock
             If Not ForceRefresh AndAlso RegionStatusCache.HasValue AndAlso Date.UtcNow < RegionCheckExpires Then
                 Return RegionStatusCache.Value
