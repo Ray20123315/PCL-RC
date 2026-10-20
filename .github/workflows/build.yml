@@ -66,6 +66,19 @@ jobs:
       run: |
         (gc "Plain Craft Launcher 2\Modules\Base\ModBase.vb") -replace 'Public Const CommitHash As String = ""', 'Public Const CommitHash As String = "${{ github.sha }}"' | Out-File "Plain Craft Launcher 2\Modules\Base\ModBase.vb"
         
+    - name: Configure public MS-Region build
+      shell: pwsh
+      run: |
+        $path = 'Plain Craft Launcher 2/Modules/ModSecret.vb'
+        $source = [System.IO.File]::ReadAllText($path)
+        $expected = 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "")'
+        $configured = 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "993878ee-3bd4-48a7-a738-df4d8b2fbf19")'
+        if (-not $source.Contains($expected) -or -not $source.Contains('Public Const EnableRegionCheck As Boolean = True')) {
+          throw 'Expected Microsoft Client ID / enabled region check policy was not found'
+        }
+        $source = $source.Replace($expected, $configured)
+        [System.IO.File]::WriteAllText($path, $source, (New-Object System.Text.UTF8Encoding($false)))
+
     - name: Generate PCL-RC application icon
       shell: pwsh
       run: |
@@ -129,12 +142,12 @@ jobs:
           set -euo pipefail
           original="prerelease-dist/Plain Craft Launcher 2.exe"
           test -s "$original"
-          asset="prerelease-dist/PCL-RC-Region-Checked.exe"
+          asset="prerelease-dist/PCL RC.exe"
           mv "$original" "$asset"
-          cp "$asset" "prerelease-dist/PCL-RC-地区检查版.exe"
-          (cd prerelease-dist && zip -q PCL-RC-Region-Checked.zip "PCL-RC-地区检查版.exe")
+          cp "$asset" "prerelease-dist/PCL RC.exe"
+          (cd prerelease-dist && zip -q PCL-RC-MS-Region.zip "PCL RC.exe")
           rm "prerelease-dist/PCL-RC-地区检查版.exe"
-          package="prerelease-dist/PCL-RC-Region-Checked.zip"
+          package="prerelease-dist/PCL-RC-MS-Region.zip"
           test -s "$package"
           tag="pcl-rc-public-${GITHUB_SHA:0:8}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
@@ -142,7 +155,7 @@ jobs:
             exit 0
           fi
           cat > prerelease-notes.md <<'NOTES'
-          **Plain Craft Launcher – Ray Custom（PCL-RC）** 是以 PCL2 為基礎的非官方修改版；此版本啟用地區檢查且不內建 Microsoft Client ID。
+          **Plain Craft Launcher – Ray Custom（PCL RC）** 公開測試版，基於 PCL2 的非官方修改版本。本版預先設定 Microsoft Client ID，並啟用地區下載檢查。
 
           - **社群資源：** 使用 Modrinth；CurseForge API 連線暫停，原始碼保留。
           - **品牌與介面：** Windows EXE 使用專屬 PCL-RC 圖示；啟動過渡動畫不再使用小尺寸 ICO，改為獨立的 160 × 160 PNG；左上角維持原有 PCL-RC 圖示。GitHub 直下載為英文檔名，ZIP 內提供中文檔名 EXE。
@@ -153,7 +166,7 @@ jobs:
           - **隱私與介面：** 初次使用裝置位置須徵求明確許可；不會將裝置經緯度上傳至外部服務。一般介面只顯示地區與下載狀態，不列出內部地區查詢來源或代理細節。
           - **地區顯示：** 首次進入提示地區與下載可用性，之後在左上角常駐顯示，點擊可重新檢查。
           - **設定介面：** 登錄檔隔離改為狀態文字與「更改」按鈕，切換後重啟生效。
-          - **Microsoft 正版登入：** 本版本不內建 Client ID；401 訊息已加入診斷說明，但尚未修復或驗證登入服務授權。
+          - **Microsoft 正版登入：** 本版已預設 Microsoft Client ID，但尚未完成 Minecraft Services 實際權限驗證，不能保證登入成功。
 
           注意：Windows 高精度定位可能使用 GPS、Wi-Fi 或其他來源，並非保證衛星 GPS。離線國界資料有解析度限制，靠近邊境或海岸可能需要備援確認。網路代理及 VPN 可能影響判斷，無法保證用戶端防竄改或各國法規合規。這是預發布測試版，尚未完成 Windows 實際操作測試。
 
@@ -163,7 +176,7 @@ jobs:
           gh release create "$tag" "$asset" "$package" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
-            --title "Plain Craft Launcher – Ray Custom (PCL-RC) 公開測試版" \
+            --title "Plain Craft Launcher – Ray Custom（PCL RC）MS-Region 公開測試版" \
             --prerelease \
             --latest=false \
             --notes-file prerelease-notes.md
