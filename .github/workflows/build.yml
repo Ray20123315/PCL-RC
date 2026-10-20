@@ -122,8 +122,13 @@ jobs:
           set -euo pipefail
           original="prerelease-dist/Plain Craft Launcher 2.exe"
           test -s "$original"
-          asset="prerelease-dist/PCL-RC-地区检查版.exe"
+          asset="prerelease-dist/PCL-RC-Region-Checked.exe"
           mv "$original" "$asset"
+          cp "$asset" "prerelease-dist/PCL-RC-地区检查版.exe"
+          (cd prerelease-dist && zip -q PCL-RC-Region-Checked.zip "PCL-RC-地区检查版.exe")
+          rm "prerelease-dist/PCL-RC-地区检查版.exe"
+          package="prerelease-dist/PCL-RC-Region-Checked.zip"
+          test -s "$package"
           tag="pcl-rc-public-${GITHUB_SHA:0:8}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Pre-release $tag already exists; keeping the existing verified release."
@@ -133,7 +138,7 @@ jobs:
           **Plain Craft Launcher – Ray Custom（PCL-RC）** 是以 PCL2 為基礎的非官方修改版；此版本啟用地區檢查且不內建 Microsoft Client ID。
 
           - **社群資源：** 使用 Modrinth；CurseForge API 連線暫停，原始碼保留。
-          - **品牌：** Windows EXE 已使用專屬 PCL-RC 圖示，檔案資訊為 Plain Craft Launcher – Ray Custom。
+          - **品牌：** Windows EXE 已使用專屬 PCL-RC 圖示。GitHub 直下載使用英文檔名；ZIP 內另提供中文 EXE 檔名。
           - **地區檢查 v3：** 優先使用獲得授權的 Windows 高精度裝置位置，並以內建離線地圖在本機判斷國家；無法確認時參考 Windows 地區設定與網路出口 IP。Windows 地區設定可自行變更，不會單獨使下載功能解鎖。中國大陸（CN）及未能可靠確認時依規則暫停下載。
           - **地圖資料：** 使用 Natural Earth 公有領域國界資料作為裝置位置的本機國家判定。此資料屬概略地圖，沿海或邊界可能回退其他檢查。
           - **隱私與介面：** 初次使用裝置位置須徵求明確許可；不會將裝置經緯度上傳至外部服務。一般介面只顯示地區與下載狀態，不列出內部地區查詢來源或代理細節。
@@ -146,7 +151,7 @@ jobs:
           PCL 原始專案：https://github.com/Meloong-Git/PCL
           本修改版原始碼與授權說明：https://github.com/Ray20123315/PCL-RC/blob/main/LICENCE
           NOTES
-          gh release create "$tag" "$asset" \
+          gh release create "$tag" "$asset" "$package" \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Plain Craft Launcher – Ray Custom (PCL-RC) 公開測試版" \
