@@ -144,9 +144,7 @@ jobs:
           test -s "$original"
           asset="prerelease-dist/PCL RC.exe"
           mv "$original" "$asset"
-          cp "$asset" "prerelease-dist/PCL RC.exe"
           (cd prerelease-dist && zip -q PCL-RC-MS-Region.zip "PCL RC.exe")
-          rm "prerelease-dist/PCL-RC-地区检查版.exe"
           package="prerelease-dist/PCL-RC-MS-Region.zip"
           test -s "$package"
           tag="pcl-rc-public-${GITHUB_SHA:0:8}"
