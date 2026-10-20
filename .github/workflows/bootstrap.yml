@@ -1,0 +1,47 @@
+name: Import verified PCL-RC source
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bootstrap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    if: github.repository == 'Ray20123315/PCL-RC'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Import source without overwriting this repository's branding
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f .pcl-rc-source-imported ]]; then
+            echo "Source already imported; no second import."
+            exit 0
+          fi
+          git clone --depth 1 https://github.com/Ray20123315/PCL.git .pcl-source-tmp
+          expected="39c541f2e155090bde118c6490383b97d0f87ade"
+          actual="$(git -C .pcl-source-tmp rev-parse HEAD)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::Source changed: expected $expected, got $actual"
+            exit 1
+          fi
+          rsync -a --exclude='.git/' --exclude='.github/workflows/' \
+            --exclude='README.md' --exclude='branding/' \
+            .pcl-source-tmp/ ./
+          rm -rf .pcl-source-tmp
+          printf 'source_repo=Ray20123315/PCL\nsource_commit=%s\n' "$expected" > .pcl-rc-source-imported
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m 'Import verified PCL source into Plain Craft Launcher Ray Custom'
+          git push origin HEAD:main
