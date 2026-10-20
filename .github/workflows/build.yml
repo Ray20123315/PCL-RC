@@ -3,10 +3,16 @@ on:
   push:
     paths:
       - 'Plain Craft Launcher 2/**'
+      - 'MeloongCore'
+      - 'PCLCS/**'
+      - 'branding/**'
       - '.github/workflows/**'
   pull_request:
     paths:
       - 'Plain Craft Launcher 2/**'
+      - 'MeloongCore'
+      - 'PCLCS/**'
+      - 'branding/**'
       - '.github/workflows/**'
   workflow_dispatch:
     inputs:
