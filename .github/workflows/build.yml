@@ -1,0 +1,149 @@
+name: Build PCL-RC
+on:
+  push:
+    paths:
+      - 'Plain Craft Launcher 2/**'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'Plain Craft Launcher 2/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+    inputs:
+      publish_prerelease:
+        description: 'Publish a PCL-RC public region-checked prerelease after successful builds'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    strategy:  
+       matrix:  
+         configuration: [Debug, Release]
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+        submodules: true
+
+    - name: Set Describe
+      shell: bash
+      run: |
+          describe=`git describe --tags --always`
+          echo "describe=$describe" >> $GITHUB_ENV
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v3
+      with:
+        msbuild-architecture: x64
+    
+    - name: Update Help
+      run:  |
+        Set-Location ..
+        git clone https://github.com/LTCatt/PCL2Help.git -b master --single-branch --depth 1
+        Set-Location PCL2Help
+        Remove-Item -Path *.* -Recurse -Force
+        Compress-Archive -Path .\* -DestinationPath .\Help.zip
+        Copy-Item -Path .\Help.zip -Destination "${{ GITHUB.WORKSPACE }}\Plain Craft Launcher 2\Resources\Help.zip" -Force
+        Set-Location ..
+        Remove-Item PCL2Help -Recurse -Force
+        Set-Location ${{ GITHUB.WORKSPACE }}
+
+
+    - name: Replace
+      run: |
+        (gc "Plain Craft Launcher 2\Modules\Base\ModBase.vb") -replace 'Public Const CommitHash As String = ""', 'Public Const CommitHash As String = "${{ github.sha }}"' | Out-File "Plain Craft Launcher 2\Modules\Base\ModBase.vb"
+        
+    - name: Generate PCL-RC application icon
+      shell: pwsh
+      run: |
+        python -m pip install --quiet Pillow
+        @'
+        from pathlib import Path
+        from PIL import Image
+        image = Image.open('branding/PCL-RC.webp')
+        image.load()
+        if image.size != (128, 128):
+            raise ValueError('Unexpected PCL-RC logo dimensions')
+        output = Path('Plain Craft Launcher 2/Images/icon.ico')
+        image.convert('RGBA').resize((256,256), Image.Resampling.LANCZOS).save(
+            output, format='ICO', sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
+        with Image.open(output) as check:
+            check.verify()
+        print('Embedded PCL-RC icon:', output, output.stat().st_size)
+        '@ | python -
+
+    - name: Restore NuGet Packages
+      run: dotnet restore PCLCS\PCLCS.csproj
+
+    - name: Build
+      run: msbuild "Plain Craft Launcher 2\Plain Craft Launcher 2.vbproj" -p:Configuration=${{ matrix.configuration }}
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ matrix.configuration }} ${{ env.describe }}
+        path: Plain Craft Launcher 2\obj\${{ matrix.configuration }}\Plain Craft Launcher 2.exe
+
+  prerelease:
+    name: Publish Pre-release
+    if: ${{ github.ref == 'refs/heads/main' && ((github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Release prerelease:')) || (github.event_name == 'workflow_dispatch' && inputs.publish_prerelease)) }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+
+    steps:
+      - name: Download verified Release build artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Release *
+          path: prerelease-dist
+          merge-multiple: true
+
+      - name: Publish GitHub Pre-release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          original="prerelease-dist/Plain Craft Launcher 2.exe"
+          test -s "$original"
+          asset="prerelease-dist/PCL-RC-地区检查版.exe"
+          mv "$original" "$asset"
+          tag="pcl-rc-public-${GITHUB_SHA:0:8}"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Pre-release $tag already exists; keeping the existing verified release."
+            exit 0
+          fi
+          cat > prerelease-notes.md <<'NOTES'
+          **Plain Craft Launcher – Ray Custom（PCL-RC）** 是以 PCL2 為基礎的非官方修改版；此版本啟用地區檢查且不內建 Microsoft Client ID。
+
+          - **社群資源：** 使用 Modrinth；CurseForge API 連線暫停，原始碼保留。
+          - **品牌：** Windows EXE 已使用專屬 PCL-RC 圖示，檔案資訊為 Plain Craft Launcher – Ray Custom。
+          - **地區檢查 v3：** 優先使用獲得授權的 Windows 高精度裝置位置，並以內建離線地圖在本機判斷國家；無法確認時參考 Windows 地區設定與網路出口 IP。Windows 地區設定可自行變更，不會單獨使下載功能解鎖。中國大陸（CN）及未能可靠確認時依規則暫停下載。
+          - **地圖資料：** 使用 Natural Earth 公有領域國界資料作為裝置位置的本機國家判定。此資料屬概略地圖，沿海或邊界可能回退其他檢查。
+          - **隱私與介面：** 初次使用裝置位置須徵求明確許可；不會將裝置經緯度上傳至外部服務。一般介面只顯示地區與下載狀態，不列出內部地區查詢來源或代理細節。
+          - **地區顯示：** 首次進入提示地區與下載可用性，之後在左上角常駐顯示，點擊可重新檢查。
+          - **設定介面：** 登錄檔隔離改為狀態文字與「更改」按鈕，切換後重啟生效。
+          - **Microsoft 正版登入：** 本版本不內建 Client ID；401 訊息已加入診斷說明，但尚未修復或驗證登入服務授權。
+
+          注意：Windows 高精度定位可能使用 GPS、Wi-Fi 或其他來源，並非保證衛星 GPS。離線國界資料有解析度限制，靠近邊境或海岸可能需要備援確認。網路代理及 VPN 可能影響判斷，無法保證用戶端防竄改或各國法規合規。這是預發布測試版，尚未完成 Windows 實際操作測試。
+
+          PCL 原始專案：https://github.com/Meloong-Git/PCL
+          本修改版原始碼與授權說明：https://github.com/Ray20123315/PCL-RC/blob/main/LICENCE
+          NOTES
+          gh release create "$tag" "$asset" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Plain Craft Launcher – Ray Custom (PCL-RC) 公開測試版" \
+            --prerelease \
+            --latest=false \
+            --notes-file prerelease-notes.md
