@@ -121,6 +121,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="启动器更新" Margin="0,0,25,0" />
                     <local:MyComboBox x:Name="ComboSystemUpdate" local:SettingService.Key="SystemSystemUpdate" Grid.Column="1">
@@ -170,6 +171,11 @@
                                    Opacity="0.8" Text="读取中" />
                         <local:MyButton x:Name="BtnSystemRegistryChange" Text="更改" MinWidth="70" Padding="9,0"
                                         Height="28" ToolTip="修改注册表隔离设置；重启 PCL 后生效" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,13,0,0" VerticalAlignment="Center">
+                        <TextBlock VerticalAlignment="Center" Text="PCL RC 下载授权" Margin="0,0,25,0" />
+                        <local:MyButton x:Name="BtnPclRcLicense" Text="输入授权 KEY" MinWidth="140" Height="28" Padding="13,0"
+                                        ToolTip="用于解除 PCL RC 内 Minecraft 下载与地区限制，每把 KEY 仅可绑定一台装置。" />
                     </StackPanel>
                 </Grid>
             </local:MyCard>
