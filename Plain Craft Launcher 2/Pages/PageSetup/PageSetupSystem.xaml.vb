@@ -100,6 +100,21 @@ Public Class PageSetupSystem
         InputPotatoCode(False)
     End Sub
 
+    ' 单设备许可仅解锁 Minecraft 下载与区域策略，不限制启动器自身的使用。
+    Private Async Sub BtnPclRcLicense_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnPclRcLicense.Click
+        Dim licenseKey = MyMsgBoxInput("输入 PCL RC 授权 KEY", "KEY 只解锁本机的 Minecraft 下载与地区限制，且只能绑定一次。", HintText:="PCLRC-...")
+        If String.IsNullOrWhiteSpace(licenseKey) Then Return
+        BtnPclRcLicense.IsEnabled = False
+        Try
+            Dim result = Await System.Threading.Tasks.Task.Run(Function() ActivatePclRcLicense(licenseKey))
+            MyMsgBox(result, "授权成功")
+        Catch ex As Exception
+            MyMsgBox("授权未完成：" & ex.Message, "授权失败")
+        Finally
+            BtnPclRcLicense.IsEnabled = True
+        End Try
+    End Sub
+
     '调试模式
     Private Sub CheckDebugMode_Change() Handles CheckDebugMode.Change
         If AniControlEnabled = 0 Then Hint("部分调试信息将在刷新或启动器重启后切换显示！",, False)
