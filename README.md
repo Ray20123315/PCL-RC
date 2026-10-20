@@ -1,5 +1,9 @@
 # Plain Craft Launcher – Ray Custom (PCL-RC)
 
+![PCL-RC 自定义图标](branding/PCL-RC.webp)
+
+[**下载公开测试版**](https://github.com/Ray20123315/PCL-RC/releases) · [**私人构建**](https://github.com/Ray20123315/PCL-RC_Private/releases)（需要访问权限）
+
 > PCL-RC 是基于 Plain Craft Launcher 2（PCL2）制作的**非官方**个人修改版本，与原作者及 PCL-CE 社区无官方关联。
 
 本项目由 Ray20123315 维护，主要提供 Modrinth 社区资源、Minecraft 启动管理、可选的注册表隔离，以及根据不同构建配置选择启用的下载地区检查。
