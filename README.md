@@ -19,6 +19,7 @@
 - 原始项目：[Meloong-Git/PCL](https://github.com/Meloong-Git/PCL)
 - 本项目源代码基于：[Ray20123315/PCL](https://github.com/Ray20123315/PCL)
 - 构建版本与程序资源以本仓库各次 Commit 和 Release 为准。
+- 首次使用时显示 [PCL-RC 使用须知](NOTICE.md)，不再显示旧版“开源版本说明”；原作者的开源授权不受修改。
 - 请遵循仓库内的 [LICENCE](LICENCE) 以及第三方依赖的授权条件。
 
 > 这是测试性质的非官方修改版，并非 Minecraft、Microsoft、Mojang、CurseForge、Modrinth 或原 PCL 项目的官方产品。
