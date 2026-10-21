@@ -1,27 +1,16 @@
-# PCL RC 下載安全須知
+# PCL RC 官方下載與程式碼說明
 
-## 唯一官方下載入口
+PCL RC 以龍騰貓躍的 Plain Craft Launcher 2（PCL2）為基礎。**開發者聲明本專案未加入病毒或惡意程式碼**，並公開原始碼供使用者檢視。
 
-**目前：** https://pcl-rc-licenses.ray20123315.workers.dev/  
-**規劃中的官方子網域：** https://pclrc.ray2025.com/ （尚未啟用，待 DNS 與部署驗證通過才會公告切換）。
+- **專案原始碼：** https://github.com/Ray20123315/PCL-RC/
+- **目前的下載網站：** https://pcl-rc-licenses.ray20123315.workers.dev/
+- **規劃中的專屬網址：** https://pclrc.ray2025.com/（DNS 與下載路由尚未驗證啟用）
+- **執行檔：** 僅由官方網站提供 `PCL RC.exe`。GitHub 僅用於發布原始碼與 CI 建置驗證。
 
-PCL RC 原始碼公開於 [Ray20123315/PCL-RC](https://github.com/Ray20123315/PCL-RC)。GitHub 儲存庫不是正式 EXE 下載渠道，之後的 GitHub Actions 只執行編譯檢查、不公開 EXE。**歷史 Release 的二進位資產尚在遷移，未完成前不能視為已刪除。**
+下載頁會公布對應 EXE 的 SHA-256。使用者可透過 PowerShell 核對：
 
-## 冒名下載與惡意程式風險
+```powershell
+Get-FileHash -Algorithm SHA256 '.\PCL RC.exe'
+```
 
-網路上可能有人用「恢復 MC 下載功能」「解除地區限制」「PCL RC 修改版」等描述散布未授權程式。這些檔案可能被修改或植入惡意程式；**不能只靠檔案名稱、圖示、截圖或宣稱的版本號辨識安全性**。
-
-請注意：
-
-1. 只從本專案正式公布的官方網站下載；不要使用陌生雲端硬碟、縮網址、聊天群組附件、第三方整合包或要求額外安裝程式的網站。
-2. 對照官方公告的 **SHA-256**。在 Windows PowerShell 使用 `Get-FileHash -Algorithm SHA256 '.\PCL RC.exe'`。
-3. 保持 Windows Defender／SmartScreen 開啟。若瀏覽器或防毒軟體發出警示，先核對來源和雜湊，不要盲目略過警告或關閉防護。
-4. 本專案無法驗證、背書其他網站提供的執行檔。發現可疑冒名網站或散布內容，請透過 GitHub Issues 提供連結、檔案雜湊、發現時間；**不要公開上傳可疑 EXE 或個人資料**。
-
-以上為安全防範建議；未附個別案例及檢測證據時，不代表所有第三方檔案都已證實是木馬。
-
-## 開放原始碼與安全稽核
-
-公開原始碼的目的，是讓使用者可以檢視功能、授權及下載地區判斷的實作，但**原始碼公開不等於任意來源的 EXE 可信**。對於正式下載檔，應同時公開與該建置對應的原始碼 commit、檔案 SHA-256、建置資訊；有條件時以可信的程式碼簽章提高發行者辨識能力。
-
-PCL RC 為非官方 Minecraft 啟動器，並非 Mojang、Microsoft 或原 PCL 作者官方產品。
+此為專案發布者的原始碼與下載聲明，不是獨立第三方惡意程式檢測報告。PCL RC 並非 Minecraft、Microsoft 或原 PCL 作者的官方發行版。
