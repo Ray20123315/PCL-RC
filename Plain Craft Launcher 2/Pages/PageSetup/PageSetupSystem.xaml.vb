@@ -115,6 +115,37 @@ Public Class PageSetupSystem
         End Try
     End Sub
 
+    ' 导出的申请文件只有公钥，不包含装置私钥。
+    Private Sub BtnPclRcOfflineExport_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnPclRcOfflineExport.Click
+        Try
+            Dim chooser As New Microsoft.Win32.SaveFileDialog With {
+                .Title = "保存 PCL RC 装置申请文件",
+                .Filter = "PCL RC 装置申请文件|*.pclrc-request",
+                .FileName = "PCL-RC-Device.pclrc-request"
+            }
+            If chooser.ShowDialog() <> True Then Return
+            System.IO.File.WriteAllText(chooser.FileName, ExportPclRcDeviceRequest(), New System.Text.UTF8Encoding(False))
+            MyMsgBox("装置申请文件已保存。请交给管理员，核准后再导入管理员签发的 .pclrc-license 文件。", "申请文件已导出")
+        Catch ex As Exception
+            MyMsgBox("无法导出装置申请文件：" & ex.Message, "导出失败")
+        End Try
+    End Sub
+
+    Private Sub BtnPclRcOfflineImport_Click(sender As Object, e As MouseButtonEventArgs) Handles BtnPclRcOfflineImport.Click
+        Try
+            Dim chooser As New Microsoft.Win32.OpenFileDialog With {
+                .Title = "导入 PCL RC 离线授权文件",
+                .Filter = "PCL RC 离线授权文件|*.pclrc-license"
+            }
+            If chooser.ShowDialog() <> True Then Return
+            Dim text = System.IO.File.ReadAllText(chooser.FileName, System.Text.Encoding.UTF8)
+            Dim message = ImportPclRcOfflineLicense(text)
+            MyMsgBox(message & vbCrLf & "离线期间无法即时撤销授权；本机系统时间变化可能影响有效期判断。", "离线授权已导入")
+        Catch ex As Exception
+            MyMsgBox("无法导入离线授权文件：" & ex.Message, "导入失败")
+        End Try
+    End Sub
+
     '调试模式
     Private Sub CheckDebugMode_Change() Handles CheckDebugMode.Change
         If AniControlEnabled = 0 Then Hint("部分调试信息将在刷新或启动器重启后切换显示！",, False)
