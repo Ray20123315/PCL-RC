@@ -2,26 +2,37 @@
 
 ![PCL RC 專案圖示](branding/PCL-RC.webp)
 
-**[官網下載：內建 Microsoft Client ID 的 PCL RC.exe](https://pcl-rc-licenses.ray20123315.workers.dev/download/PCL%20RC.exe)** · [專案發行紀錄](https://github.com/Ray20123315/PCL-RC/releases) · [單裝置下載權限申請](https://pcl-rc-licenses.ray20123315.workers.dev/apply)
+> **安全公告：請只透過 PCL RC 官方網站取得執行檔。** 不要執行來路不明的「恢復 Minecraft 下載」「免限制」「破解版」啟動器。軟體名稱、圖示相同不代表是官方檔案。詳見 [下載安全須知](SECURITY.md)。
 
-PCL RC 是基於 Plain Craft Launcher 2（PCL2）的**非官方個人修改版**，提供 Minecraft 啟動與版本管理、Modrinth 社群資源、登錄檔隔離及下載地區檢查。
+**目前官方下載入口：** https://pcl-rc-licenses.ray20123315.workers.dev/  
+**預計使用的官方網域：** `pclrc.ray2025.com`（**尚未啟用**；正式啟用前請勿視為官方下載站）  
+**原始碼與授權聲明：** 本 GitHub 儲存庫。
 
-## 下載與授權
+PCL RC 是基於 Plain Craft Launcher 2（PCL2）的**非官方個人修改版**，提供 Minecraft 啟動、版本管理、Modrinth 社群資源、登錄檔隔離及下載地區檢查。
 
-- **GitHub 開源發行版：** 不內建 Microsoft Client ID，預設啟用 Minecraft 下載地區檢查。開源建置不自動取得 Microsoft 服務使用權限。\n- **官網下載版：** MS-Region，預先設定 Microsoft Client ID，啟用 Minecraft 下載地區檢查。可免費下載／啟動，不需要 KEY。
-- **檔名：** 官網下載固定 `PCL RC.exe`；GitHub 的無預設 ID 開源發行檔另以 `PCL-RC-OpenSource-NoMS.exe` 命名，避免混淆。
-- **選用 KEY：** 需要解除 PCL RC 內 Minecraft 下載及地區限制的使用者，可以於官網填寫詳細申請，由管理者人工審核，不保證通過。
-- 每把 KEY 只能啟用一次，綁定一台 Windows 裝置的不可匯出 P-256 私鑰；啟用入口位於 **設定 → 其他 → PCL RC 下載授權**。授權須透過網路服務驗證，授權遭撤銷或驗證失敗時仍適用原有地區檢查。
-- KEY **不提供** Microsoft、Minecraft 或第三方服務的遊戲所有權、帳號登入權限或服務存取保證。
+## 發行與授權原則
 
-目前為測試發行：Windows CI 建置可驗證，仍須另外完成 Windows 實機的授權、登入、下載與地區行為測試。官網版 Microsoft Client ID 已預設，但尚未確定 Minecraft Services 接受該應用程式；開源原始碼和開源發行版不內建此 ID。
+- **本儲存庫只作原始碼發布，不再從 GitHub Actions 上傳 EXE 或打包發行檔。** 正式網站提供唯一指定的下載入口。
+- **重要遷移狀態：** 之前 GitHub Releases 留下的 EXE／ZIP 暫時仍可能可取得；在官網完成獨立託管、校驗與切換前，不能先刪除其目前所依賴的檔案。完成遷移後會清除歷史 Release 執行檔。
+- 官網 Windows 執行檔固定命名為 `PCL RC.exe`，採 MS-Region（預先設定 Microsoft Client ID、啟用地區檢查）。**公開原始碼不內建 Microsoft Client ID**。
+- 啟動器本身可以免費下載與啟動；KEY 只用來解除 PCL RC 內 Minecraft 下載與地區限制，不提供 Microsoft／Minecraft 帳號或遊戲所有權。
+- KEY 核發需要人工審核，一次性兌換並綁定單一裝置。年／月／天／時／分／秒、永久及簽章離線授權仍處於測試分支，尚未正式發行。
+- 目前 Windows CI 能編譯專案，但 KEY 啟用、登入與下載限制的完整 Windows 實機測試仍待完成。
 
-- **下載分流：** GitHub 開源 Release 以 `pcl-rc-opensource-` 標籤發布不內建 Microsoft Client ID 的 Windows 程式；官網則提供獨立、預先設定 Microsoft Client ID 的 MS-Region 測試版，兩者皆維持下載地區檢查。
+## 驗證下載檔案
+
+正式下載區應提供 EXE 的 SHA-256，Windows 使用者可在 PowerShell 執行：
+
+```powershell
+Get-FileHash -Algorithm SHA256 '.\PCL RC.exe'
+```
+
+只有雜湊和**可信官方管道另行公布的值**相符，才能確認內容一致；雜湊本身不代表檔案必然無惡意程式。請保留 Windows Defender／SmartScreen 防護，不要為了安裝而關閉安全功能。更多說明見 [SECURITY.md](SECURITY.md)。
 
 ## 專案與授權
 
 - 原始專案：[Meloong-Git/PCL](https://github.com/Meloong-Git/PCL)
 - 本專案程式碼源自：[Ray20123315/PCL](https://github.com/Ray20123315/PCL)
-- 著作權、第三方資源授權及其他聲明請參閱 [LICENCE](LICENCE)、[NOTICE.md](NOTICE.md)。
-- CurseForge API 連線暫停；保留原始解析程式碼，未授權的第三方 API 金鑰不會內建。
-- 本專案並非 Minecraft、Microsoft、Mojang、原 PCL 作者或 PCL 社群的官方服務。
+- 著作權、第三方授權與其他聲明：[LICENCE](LICENCE)、[NOTICE.md](NOTICE.md)。
+- CurseForge API 連線暫停，原始解析程式碼保留，不內建未經授權的第三方 API Secret。
+- 本專案並非 Minecraft、Microsoft、Mojang 或原 PCL 作者的官方服務。
