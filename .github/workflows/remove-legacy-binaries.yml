@@ -1,0 +1,71 @@
+name: Remove legacy public binary assets
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type REMOVE_PUBLIC_BINARIES_AFTER_SITE_VERIFIED'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  cleanup:
+    if: ${{ inputs.confirm == 'REMOVE_PUBLIC_BINARIES_AFTER_SITE_VERIFIED' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify sole official website serves the correct independent binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected=f38f8331512fc4b90f29d4b77ef5ed1d334c929a37fdc684cea1ac9af85d8fae
+          url=https://pclrc.ray2025.com/download/PCL%20RC.exe
+          final="$(curl --fail --silent --show-error --location --max-time 120 --dump-header headers.txt --output official.exe --write-out '%{url_effective}' "$url")"
+          [[ "$final" == "$url" ]] || { echo 'Download redirected to an unverified host'; exit 1; }
+          grep -iE "^x-file-sha256:[[:space:]]*${expected}([[:space:]]|$)" headers.txt >/dev/null
+          echo "$expected  official.exe" | sha256sum --check --status
+          [[ "$(stat -c %s official.exe)" == '5959680' ]]
+          rm -f official.exe headers.txt
+
+      - name: Remove old executable/packaged binary assets from all public releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r id; do
+            [[ -n "$id" ]] || continue
+            echo "Cleaning release $id"
+            while IFS=$'\t' read -r asset_id asset_name; do
+              [[ -n "${asset_id:-}" ]] || continue
+              echo "Deleting public binary asset: $asset_name"
+              gh api -X DELETE "/repos/$GITHUB_REPOSITORY/releases/assets/$asset_id"
+            done < <(gh api "/repos/$GITHUB_REPOSITORY/releases/$id/assets?per_page=100" --jq '.[] | select(.name | test("\\.(exe|msi|zip|7z|rar)$";"i")) | [.id,.name] | @tsv')
+          done < <(gh api --paginate "/repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].id')
+
+      - name: Remove historically uploaded executable CI artifacts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r id; do
+            [[ -n "$id" ]] || continue
+            gh api -X DELETE "/repos/$GITHUB_REPOSITORY/actions/artifacts/$id"
+          done < <(gh api --paginate "/repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" --jq '.artifacts[] | select(.name | test("^(Release|Debug) ")) | .id')
+
+      - name: Verify no old Release executable or bundled ZIP remains
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          total=0
+          while IFS= read -r id; do
+            [[ -n "$id" ]] || continue
+            n="$(gh api "/repos/$GITHUB_REPOSITORY/releases/$id/assets?per_page=100" --jq '[.[] | select(.name | test("\\.(exe|msi|zip|7z|rar)$";"i"))] | length')"
+            total=$((total+n))
+          done < <(gh api --paginate "/repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].id')
+          [[ "$total" == '0' ]] || { echo "Remaining executable assets: $total"; exit 1; }
