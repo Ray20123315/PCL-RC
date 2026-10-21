@@ -2,7 +2,7 @@
 
 ![PCL RC 專案圖示](branding/PCL-RC.webp)
 
-> **安全公告：請只透過 PCL RC 官方網站取得執行檔。** 不要執行來路不明的「恢復 Minecraft 下載」「免限制」「破解版」啟動器。軟體名稱、圖示相同不代表是官方檔案。詳見 [下載安全須知](SECURITY.md)。
+> **開發者聲明：** PCL RC 基於龍騰貓躍的 PCL2 修改，本專案未加入病毒或惡意程式碼。公開原始碼可供檢視，執行檔統一由專案網站提供。
 
 **目前官方下載入口：** https://pcl-rc-licenses.ray20123315.workers.dev/  
 **預計使用的官方網域：** `pclrc.ray2025.com`（**尚未啟用**；正式啟用前請勿視為官方下載站）  
@@ -27,7 +27,7 @@ PCL RC 是基於 Plain Craft Launcher 2（PCL2）的**非官方個人修改版**
 Get-FileHash -Algorithm SHA256 '.\PCL RC.exe'
 ```
 
-只有雜湊和**可信官方管道另行公布的值**相符，才能確認內容一致；雜湊本身不代表檔案必然無惡意程式。請保留 Windows Defender／SmartScreen 防護，不要為了安裝而關閉安全功能。更多說明見 [SECURITY.md](SECURITY.md)。
+將結果與本站公布的 SHA-256 核對，即可確認下載檔案與官方發布的檔案內容一致。
 
 ## 專案與授權
 
