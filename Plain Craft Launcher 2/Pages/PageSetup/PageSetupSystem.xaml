@@ -172,10 +172,18 @@
                         <local:MyButton x:Name="BtnSystemRegistryChange" Text="更改" MinWidth="70" Padding="9,0"
                                         Height="28" ToolTip="修改注册表隔离设置；重启 PCL 后生效" />
                     </StackPanel>
-                    <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,13,0,0" VerticalAlignment="Center">
-                        <TextBlock VerticalAlignment="Center" Text="PCL RC 下载授权" Margin="0,0,25,0" />
-                        <local:MyButton x:Name="BtnPclRcLicense" Text="输入授权 KEY" MinWidth="140" Height="28" Padding="13,0"
-                                        ToolTip="用于解除 PCL RC 内 Minecraft 下载与地区限制，每把 KEY 仅可绑定一台装置。" />
+                    <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Margin="0,13,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="PCL RC 下载授权" Margin="0,0,25,0" />
+                            <local:MyButton x:Name="BtnPclRcLicense" Text="输入授权 KEY" MinWidth="140" Height="28" Padding="13,0"
+                                            ToolTip="授权有有效期限，KEY 首次成功激活后开始计时；永久授权不会过期。" />
+                        </StackPanel>
+                        <WrapPanel Margin="0,10,0,0">
+                            <local:MyButton x:Name="BtnPclRcOfflineExport" Text="导出装置申请文件" MinWidth="150" Height="28" Margin="0,0,12,0" Padding="12,0"
+                                            ToolTip="无法访问 Cloudflare 时，先导出本机装置公钥文件，交给管理员申请离线授权。" />
+                            <local:MyButton x:Name="BtnPclRcOfflineImport" Text="导入离线授权文件" MinWidth="150" Height="28" Padding="12,0"
+                                            ToolTip="选择管理员核发的 .pclrc-license 文件，验证签名、装置与到期时间。" />
+                        </WrapPanel>
                     </StackPanel>
                 </Grid>
             </local:MyCard>
